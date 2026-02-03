@@ -888,6 +888,7 @@
         let currentRotation = 0;
         let isSpinning = false;
         let takenNumbers = new Set();
+        let playedNames = new Set(); // Track names that have already played
         let latestResultKey = null;
         let wheelCreated = false;
 
@@ -942,6 +943,7 @@
             const resultsList = document.getElementById('resultsList');
             const results = [];
             takenNumbers.clear();
+            playedNames.clear(); // Clear and rebuild played names
 
             snapshot.forEach((childSnapshot) => {
                 const data = childSnapshot.val();
@@ -950,6 +952,8 @@
                     ...data
                 });
                 takenNumbers.add(data.result);
+                // Normalize name: lowercase and trim for comparison
+                playedNames.add(data.name.toLowerCase().trim());
             });
 
             // Sort by result number (low to high)
@@ -1133,6 +1137,12 @@
             if (!playerName) {
                 showError('spinErrorMessage', '⚠️ Vui lòng nhập họ và tên trước khi quay!');
                 nameInput.focus();
+                return;
+            }
+
+            // Check if this name has already played
+            if (playedNames.has(playerName.toLowerCase().trim())) {
+                showError('spinErrorMessage', '⚠️ Bạn đã quay xong lượt của mình rồi! Mỗi người chỉ được quay 1 lần.');
                 return;
             }
 
