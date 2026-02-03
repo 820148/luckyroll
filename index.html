@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,15 +19,26 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 20px;
             overflow-x: hidden;
         }
 
+        .main-wrapper {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
         .container {
             text-align: center;
-            max-width: 600px;
+            max-width: 550px;
             width: 100%;
+            flex: 1;
+            min-width: 320px;
         }
 
         h1 {
@@ -38,8 +50,13 @@
         }
 
         @keyframes glow {
-            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-            to { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 107, 107, 0.4); }
+            from {
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+
+            to {
+                text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 107, 107, 0.4);
+            }
         }
 
         .subtitle {
@@ -58,36 +75,51 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .input-group {
+        .input-row {
             display: flex;
             gap: 15px;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 15px;
         }
 
-        .input-group label {
+        .input-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-row label {
             color: #fff;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            min-width: 140px;
+            text-align: right;
         }
 
-        .input-group input {
-            width: 100px;
+        .input-row input[type="text"],
+        .input-row input[type="number"] {
+            flex: 1;
+            min-width: 150px;
+            max-width: 250px;
             padding: 12px 15px;
             border: none;
             border-radius: 12px;
-            font-size: 1.2rem;
-            text-align: center;
+            font-size: 1rem;
             background: rgba(255, 255, 255, 0.95);
             color: #1a1a2e;
-            font-weight: bold;
+            font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .input-group input:focus {
+        .input-row input[type="number"] {
+            max-width: 100px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .input-row input:focus {
             outline: none;
-            transform: scale(1.05);
+            transform: scale(1.02);
             box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
         }
 
@@ -107,11 +139,17 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 10px;
         }
 
-        .btn-create:hover {
+        .btn-create:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-create:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .wheel-container {
@@ -154,7 +192,7 @@
 
         #wheel {
             border-radius: 50%;
-            box-shadow: 
+            box-shadow:
                 0 0 0 10px #ffd700,
                 0 0 0 15px #1a1a2e,
                 0 0 0 20px rgba(255, 215, 0, 0.3),
@@ -198,6 +236,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -219,8 +258,148 @@
         }
 
         @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Results List Panel */
+        .results-panel {
+            max-width: 400px;
+            width: 100%;
+            flex: 0 0 350px;
+            min-width: 300px;
+        }
+
+        .results-list-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-height: 600px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-list-container h2 {
+            color: #ffd700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .results-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .results-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .results-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 3px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.4s ease;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(5px);
+        }
+
+        .result-item.new {
+            animation: newResult 0.6s ease;
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes newResult {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.9);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            }
+        }
+
+        .result-item .name {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .result-item .details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item .number {
+            color: #ffd700;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .result-item .time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+
+        .no-results {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 40px 20px;
+            font-style: italic;
         }
 
         .confetti {
@@ -236,6 +415,7 @@
                 opacity: 1;
                 transform: translateY(-100vh) rotate(0deg);
             }
+
             100% {
                 opacity: 0;
                 transform: translateY(100vh) rotate(720deg);
@@ -246,51 +426,201 @@
             display: none !important;
         }
 
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        .connection-status.disconnected {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease infinite;
+        }
+
+        .connected .status-dot {
+            background: #2ed573;
+        }
+
+        .disconnected .status-dot {
+            background: #ff6b6b;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .results-panel {
+                flex: none;
+                max-width: 550px;
+            }
+        }
+
         @media (max-width: 500px) {
             h1 {
                 font-size: 1.8rem;
             }
-            
-            .input-group {
+
+            .input-row {
                 flex-direction: column;
+                gap: 8px;
             }
-            
+
+            .input-row label {
+                text-align: center;
+                min-width: auto;
+            }
+
+            .input-row input[type="text"],
+            .input-row input[type="number"] {
+                max-width: 100%;
+                width: 100%;
+            }
+
             #wheel {
                 max-width: 300px;
                 max-height: 300px;
             }
+
+            .results-panel {
+                min-width: 280px;
+            }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>🎯 Vòng Quay May Mắn</h1>
-        <p class="subtitle">Nhập số người tham gia và bắt đầu quay!</p>
+    <h1>🎯 Vòng Quay May Mắn</h1>
+    <p class="subtitle">Nhập tên và số người tham gia để bắt đầu!</p>
 
-        <div class="input-section">
-            <div class="input-group">
-                <label for="participants">Số người tham gia:</label>
-                <input type="number" id="participants" min="2" max="20" value="6" />
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="input-section">
+                <div class="input-row">
+                    <label for="playerName">Họ và tên:</label>
+                    <input type="text" id="playerName" placeholder="Nhập tên của bạn..." />
+                </div>
+                <div class="input-row">
+                    <label for="participants">Số người tham gia:</label>
+                    <input type="number" id="participants" min="2" max="20" value="6" />
+                </div>
                 <button class="btn btn-create" onclick="createWheel()">Tạo Vòng Quay</button>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="wheel-container hidden" id="wheelContainer">
+                <div class="wheel-wrapper">
+                    <div class="pointer"></div>
+                    <canvas id="wheel" width="400" height="400"></canvas>
+                </div>
+                <br>
+                <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()">🎰 QUAY NGAY!</button>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <h2>🎉 Kết quả của bạn:</h2>
+                <div class="result-number" id="resultNumber">-</div>
             </div>
         </div>
 
-        <div class="wheel-container hidden" id="wheelContainer">
-            <div class="wheel-wrapper">
-                <div class="pointer"></div>
-                <canvas id="wheel" width="400" height="400"></canvas>
+        <div class="results-panel">
+            <div class="results-list-container">
+                <h2>🏆 Danh Sách Trúng Thưởng</h2>
+                <div class="results-list" id="resultsList">
+                    <div class="no-results">Chưa có kết quả nào. Hãy quay thử!</div>
+                </div>
             </div>
-            <br>
-            <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()">🎰 QUAY NGAY!</button>
-        </div>
-
-        <div class="result-section" id="resultSection">
-            <h2>🎉 Kết quả:</h2>
-            <div class="result-number" id="resultNumber">-</div>
         </div>
     </div>
 
+    <div class="connection-status disconnected" id="connectionStatus">
+        <span class="status-dot"></span>
+        <span id="connectionText">Đang kết nối...</span>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNE0Yl0t90xcAcdRIbK9MbCYr4H3m1Za8",
+            authDomain: "luckyroll-9f83d.firebaseapp.com",
+            databaseURL: "https://luckyroll-9f83d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "luckyroll-9f83d",
+            storageBucket: "luckyroll-9f83d.firebasestorage.app",
+            messagingSenderId: "666163558079",
+            appId: "1:666163558079:web:2dda751887177422eeb80a",
+            measurementId: "G-VDPWZ67WVW"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const resultsRef = database.ref('results');
+
+        // Wheel Colors
         const colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
             '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
@@ -302,16 +632,101 @@
         let currentRotation = 0;
         let isSpinning = false;
 
-        function createWheel() {
-            const input = document.getElementById('participants');
-            const value = parseInt(input.value);
-            
-            if (isNaN(value) || value < 2 || value > 20) {
-                alert('Vui lòng nhập số người từ 2 đến 20!');
+        // Connection Status
+        const connectedRef = database.ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+            const statusEl = document.getElementById('connectionStatus');
+            const textEl = document.getElementById('connectionText');
+            if (snap.val() === true) {
+                statusEl.className = 'connection-status connected';
+                textEl.textContent = 'Đã kết nối';
+            } else {
+                statusEl.className = 'connection-status disconnected';
+                textEl.textContent = 'Mất kết nối';
+            }
+        });
+
+        // Listen for realtime results
+        resultsRef.orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+            const resultsList = document.getElementById('resultsList');
+            const results = [];
+
+            snapshot.forEach((childSnapshot) => {
+                results.push({
+                    key: childSnapshot.key,
+                    ...childSnapshot.val()
+                });
+            });
+
+            // Sort by timestamp descending (newest first)
+            results.sort((a, b) => b.timestamp - a.timestamp);
+
+            if (results.length === 0) {
+                resultsList.innerHTML = '<div class="no-results">Chưa có kết quả nào. Hãy quay thử!</div>';
                 return;
             }
-            
-            segments = value;
+
+            resultsList.innerHTML = results.map((item, index) => `
+                <div class="result-item ${index === 0 ? 'new' : ''}">
+                    <div class="name">👤 ${escapeHtml(item.name)}</div>
+                    <div class="details">
+                        <span class="number">🎯 ${item.result}</span>
+                        <span class="time">${formatTime(item.timestamp)}</span>
+                    </div>
+                </div>
+            `).join('');
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 3000);
+        }
+
+        function validateInput() {
+            const nameInput = document.getElementById('playerName');
+            const participantsInput = document.getElementById('participants');
+            const name = nameInput.value.trim();
+            const participants = parseInt(participantsInput.value);
+
+            if (!name) {
+                showError('⚠️ Vui lòng nhập họ và tên của bạn!');
+                nameInput.focus();
+                return false;
+            }
+
+            if (isNaN(participants) || participants < 2 || participants > 20) {
+                showError('⚠️ Số người tham gia phải từ 2 đến 20!');
+                participantsInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function createWheel() {
+            if (!validateInput()) return;
+
+            const participantsInput = document.getElementById('participants');
+            segments = parseInt(participantsInput.value);
+
             drawWheel();
             document.getElementById('wheelContainer').classList.remove('hidden');
             document.getElementById('resultSection').style.display = 'none';
@@ -369,18 +784,27 @@
 
         function spinWheel() {
             if (isSpinning) return;
-            
+
+            const nameInput = document.getElementById('playerName');
+            const playerName = nameInput.value.trim();
+
+            if (!playerName) {
+                showError('⚠️ Vui lòng nhập họ và tên trước khi quay!');
+                nameInput.focus();
+                return;
+            }
+
             isSpinning = true;
             const spinBtn = document.getElementById('spinBtn');
             spinBtn.disabled = true;
+            spinBtn.innerHTML = '<span class="loading"></span> Đang quay...';
             document.getElementById('resultSection').style.display = 'none';
 
             // Random result (1 to segments)
             const winningNumber = Math.floor(Math.random() * segments) + 1;
-            
+
             // Calculate rotation
             const anglePerSegment = 360 / segments;
-            // We need to land on the winning segment at the top (where the pointer is)
             const targetAngle = 360 - (winningNumber - 1) * anglePerSegment - anglePerSegment / 2;
             const extraSpins = 5 + Math.random() * 3; // 5-8 full rotations
             const totalRotation = extraSpins * 360 + targetAngle;
@@ -392,17 +816,30 @@
 
             // Show result after spin
             setTimeout(() => {
+                // Save to Firebase
+                resultsRef.push({
+                    name: playerName,
+                    result: winningNumber,
+                    timestamp: Date.now()
+                }).then(() => {
+                    console.log('Result saved to Firebase');
+                }).catch((error) => {
+                    console.error('Error saving to Firebase:', error);
+                    showError('⚠️ Lỗi khi lưu kết quả!');
+                });
+
                 document.getElementById('resultSection').style.display = 'block';
                 document.getElementById('resultNumber').textContent = winningNumber;
                 createConfetti();
                 spinBtn.disabled = false;
+                spinBtn.innerHTML = '🎰 QUAY NGAY!';
                 isSpinning = false;
             }, 5000);
         }
 
         function createConfetti() {
             const confettiColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#FFD700'];
-            
+
             for (let i = 0; i < 50; i++) {
                 setTimeout(() => {
                     const confetti = document.createElement('div');
@@ -421,8 +858,11 @@
 
         // Initialize wheel on load
         window.onload = () => {
-            createWheel();
+            // Check if name is already entered
+            const nameInput = document.getElementById('playerName');
+            nameInput.focus();
         };
     </script>
 </body>
+
 </html>
