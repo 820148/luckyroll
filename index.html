@@ -1158,12 +1158,27 @@
             spinBtn.innerHTML = '<span class="loading"></span> Đang quay...';
             document.getElementById('resultSection').style.display = 'none';
 
+            // Random a number from 1 to segments
             const winningNumber = Math.floor(Math.random() * segments) + 1;
             const isDuplicate = takenNumbers.has(winningNumber);
-
+            // Calculate rotation to land on the winning number
+            // The wheel is drawn with segment 1 starting at -90deg (top)
+            // Each segment spans (360/segments) degrees
+            // To land on segment N, we need to rotate so that segment N is at the top (where pointer is)
             const anglePerSegment = 360 / segments;
-            const targetAngle = 360 - (winningNumber - 1) * anglePerSegment - anglePerSegment / 2;
+
+            // Calculate the angle where the CENTER of the winning segment should be at the top
+            // Segment 1 center is at 0 degrees from wheel's perspective (top)
+            // Segment N center is at (N-1) * anglePerSegment degrees clockwise
+            // We need to rotate the wheel so this position comes to the top (under the pointer)
+            const segmentCenterAngle = (winningNumber - 1) * anglePerSegment;
+
+            // Add random offset within the segment to make it look more natural (stay within segment bounds)
+            const randomOffset = (Math.random() - 0.5) * (anglePerSegment * 0.6); // 60% of segment width
+
+            // Calculate total rotation (5-8 full spins + target position)
             const extraSpins = 5 + Math.random() * 3;
+            const targetAngle = 360 - segmentCenterAngle + randomOffset;
             const totalRotation = extraSpins * 360 + targetAngle;
 
             const canvas = document.getElementById('wheel');
@@ -1181,12 +1196,14 @@
                 resultNumber.textContent = winningNumber;
 
                 if (isDuplicate) {
+                    // Number is already taken - show warning and allow re-spin
                     resultSection.classList.add('duplicate');
-                    resultTitle.textContent = '⚠️ Số này đã có người chọn!';
+                    resultTitle.textContent = '⚠️ Số ' + winningNumber + ' đã có người chọn!';
                     duplicateMessage.textContent = 'Vui lòng nhấn QUAY LẠI để quay lại.';
                     duplicateMessage.style.display = 'block';
                     spinBtn.innerHTML = '🔄 QUAY LẠI!';
                 } else {
+                    // Valid number - save result
                     resultSection.classList.remove('duplicate');
                     resultTitle.textContent = '🎉 Kết quả của bạn:';
                     duplicateMessage.style.display = 'none';
