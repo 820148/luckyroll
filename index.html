@@ -1166,26 +1166,31 @@
             // Each segment spans (360/segments) degrees
             const anglePerSegment = 360 / segments;
 
-            // Calculate the target angle for the winning segment
-            // Segment 1 is at the top (0 degrees), segment 2 is clockwise, etc.
-            // To land pointer on segment N, wheel needs to show segment N at top
-            const segmentCenterAngle = (winningNumber - 1) * anglePerSegment;
+            // Segment N starts at angle (N-1) * anglePerSegment from the top
+            // The CENTER of segment N is at (N-1) * anglePerSegment + anglePerSegment/2
+            // But when we draw, segment 1's left edge starts at top (-90deg)
+            // So segment 1's center is at anglePerSegment/2 from top
+            // Segment N's center is at (N-1) * anglePerSegment + anglePerSegment/2
 
-            // The target position is where we want the wheel to stop (segment center at top)
-            // Since we rotate clockwise, we need 360 - segmentCenterAngle
-            const targetPosition = 360 - segmentCenterAngle;
+            // To make pointer land on segment N's center, we rotate wheel so that
+            // segment N's center comes to top (where pointer is)
+            // This means rotating BACKWARDS by the segment center angle
+            const segmentCenterFromTop = (winningNumber - 1) * anglePerSegment + anglePerSegment / 2;
 
-            // Add small random offset within segment bounds for natural look
-            const randomOffset = (Math.random() - 0.5) * (anglePerSegment * 0.5);
+            // Calculate target rotation (negative because wheel coords vs CSS rotation)
+            const targetPosition = 360 - segmentCenterFromTop;
+
+            // Add small random offset within segment bounds for natural look (±25% of segment)
+            const randomOffset = (Math.random() - 0.5) * (anglePerSegment * 0.4);
 
             // Calculate where the wheel currently is (normalize to 0-360)
-            const currentPosition = currentRotation % 360;
+            const currentPosition = ((currentRotation % 360) + 360) % 360;
 
             // Calculate how much we need to rotate from current position to target
-            let rotationNeeded = targetPosition + randomOffset - currentPosition;
+            let rotationNeeded = (targetPosition + randomOffset) - currentPosition;
 
             // Make sure we rotate forward (positive), not backward
-            if (rotationNeeded < 0) {
+            if (rotationNeeded <= 0) {
                 rotationNeeded += 360;
             }
 
