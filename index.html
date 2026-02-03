@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vòng Quay May Mắn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 107, 107, 0.4); }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .input-group label {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .input-group input {
+            width: 100px;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .wheel-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #ffd700;
+            filter: drop-shadow(0 4px 10px rgba(255, 215, 0, 0.5));
+            z-index: 10;
+        }
+
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+
+        #wheel {
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 10px #ffd700,
+                0 0 0 15px #1a1a2e,
+                0 0 0 20px rgba(255, 215, 0, 0.3),
+                0 0 50px rgba(255, 215, 0, 0.3);
+            transition: transform 0s;
+        }
+
+        .btn-spin {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            margin-top: 25px;
+            box-shadow: 0 6px 25px rgba(245, 87, 108, 0.5);
+        }
+
+        .btn-spin:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.7);
+        }
+
+        .btn-spin:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section h2 {
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .result-number {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: pulse 0.5s ease infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(-100vh) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            #wheel {
+                max-width: 300px;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Vòng Quay May Mắn</h1>
+        <p class="subtitle">Nhập số người tham gia và bắt đầu quay!</p>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="participants">Số người tham gia:</label>
+                <input type="number" id="participants" min="2" max="20" value="6" />
+                <button class="btn btn-create" onclick="createWheel()">Tạo Vòng Quay</button>
+            </div>
+        </div>
+
+        <div class="wheel-container hidden" id="wheelContainer">
+            <div class="wheel-wrapper">
+                <div class="pointer"></div>
+                <canvas id="wheel" width="400" height="400"></canvas>
+            </div>
+            <br>
+            <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()">🎰 QUAY NGAY!</button>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <h2>🎉 Kết quả:</h2>
+            <div class="result-number" id="resultNumber">-</div>
+        </div>
+    </div>
+
+    <script>
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8B500', '#FF7F50', '#00CED1', '#FF69B4', '#32CD32',
+            '#FFD700', '#9370DB', '#20B2AA', '#FF6347', '#7B68EE'
+        ];
+
+        let segments = 6;
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        function createWheel() {
+            const input = document.getElementById('participants');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value) || value < 2 || value > 20) {
+                alert('Vui lòng nhập số người từ 2 đến 20!');
+                return;
+            }
+            
+            segments = value;
+            drawWheel();
+            document.getElementById('wheelContainer').classList.remove('hidden');
+            document.getElementById('resultSection').style.display = 'none';
+        }
+
+        function drawWheel() {
+            const canvas = document.getElementById('wheel');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 5;
+            const anglePerSegment = (2 * Math.PI) / segments;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < segments; i++) {
+                const startAngle = i * anglePerSegment - Math.PI / 2;
+                const endAngle = startAngle + anglePerSegment;
+
+                // Draw segment
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+
+                // Draw border
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw number
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + anglePerSegment / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${Math.max(16, 30 - segments)}px Arial`;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 3;
+                ctx.fillText(i + 1, radius - 20, 6);
+                ctx.restore();
+            }
+
+            // Draw center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffd700';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = true;
+            document.getElementById('resultSection').style.display = 'none';
+
+            // Random result (1 to segments)
+            const winningNumber = Math.floor(Math.random() * segments) + 1;
+            
+            // Calculate rotation
+            const anglePerSegment = 360 / segments;
+            // We need to land on the winning segment at the top (where the pointer is)
+            const targetAngle = 360 - (winningNumber - 1) * anglePerSegment - anglePerSegment / 2;
+            const extraSpins = 5 + Math.random() * 3; // 5-8 full rotations
+            const totalRotation = extraSpins * 360 + targetAngle;
+
+            const canvas = document.getElementById('wheel');
+            canvas.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+            currentRotation += totalRotation;
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Show result after spin
+            setTimeout(() => {
+                document.getElementById('resultSection').style.display = 'block';
+                document.getElementById('resultNumber').textContent = winningNumber;
+                createConfetti();
+                spinBtn.disabled = false;
+                isSpinning = false;
+            }, 5000);
+        }
+
+        function createConfetti() {
+            const confettiColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#FFD700'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        // Initialize wheel on load
+        window.onload = () => {
+            createWheel();
+        };
+    </script>
+</body>
+</html>
