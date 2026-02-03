@@ -65,6 +65,26 @@
             margin-bottom: 30px;
         }
 
+        .loading-screen {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-screen .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading-screen p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
         .input-section {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -73,6 +93,12 @@
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-section h3 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
         }
 
         .input-row {
@@ -201,12 +227,25 @@
             transition: transform 0s;
         }
 
+        .player-input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .player-input-section .input-row {
+            margin-bottom: 10px;
+        }
+
         .btn-spin {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: #fff;
             padding: 18px 50px;
             font-size: 1.3rem;
-            margin-top: 25px;
+            margin-top: 15px;
             box-shadow: 0 6px 25px rgba(245, 87, 108, 0.5);
         }
 
@@ -659,6 +698,16 @@
             display: none;
         }
 
+        .wheel-info {
+            background: rgba(46, 213, 115, 0.1);
+            border: 1px solid rgba(46, 213, 115, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #2ed573;
+            font-size: 1rem;
+        }
+
         @media (max-width: 900px) {
             .main-wrapper {
                 flex-direction: column;
@@ -687,7 +736,8 @@
             }
 
             .input-row input[type="text"],
-            .input-row input[type="number"] {
+            .input-row input[type="number"],
+            .input-row input[type="password"] {
                 max-width: 100%;
                 width: 100%;
             }
@@ -711,30 +761,51 @@
 
 <body>
     <h1>🎯 Vòng Quay May Mắn</h1>
-    <p class="subtitle">Nhập tên và số người tham gia để bắt đầu!</p>
+    <p class="subtitle" id="mainSubtitle">Đang tải...</p>
 
     <div class="main-wrapper">
         <div class="container">
-            <div class="input-section">
-                <div class="input-row">
-                    <label for="playerName">Họ và tên:</label>
-                    <input type="text" id="playerName" placeholder="Nhập tên của bạn..." />
-                </div>
+            <!-- Loading Screen -->
+            <div class="loading-screen" id="loadingScreen">
+                <div class="spinner"></div>
+                <p>Đang kết nối đến server...</p>
+            </div>
+
+            <!-- Admin Setup Section -->
+            <div class="input-section hidden" id="setupSection">
+                <h3>🔧 Thiết Lập Vòng Quay (Chỉ Dành Cho Admin)</h3>
                 <div class="input-row">
                     <label for="participants">Số người tham gia:</label>
                     <input type="number" id="participants" min="2" max="20" value="6" />
                 </div>
-                <button class="btn btn-create" onclick="createWheel()">Tạo Vòng Quay</button>
+                <div class="input-row">
+                    <label for="adminPassword">Mật khẩu Admin:</label>
+                    <input type="password" id="adminPassword" placeholder="Nhập mật khẩu..." />
+                </div>
+                <button class="btn btn-create" onclick="createWheel()">🔓 Tạo Vòng Quay</button>
                 <div class="error-message" id="errorMessage"></div>
             </div>
 
+            <!-- Wheel Section (Hidden until created) -->
             <div class="wheel-container hidden" id="wheelContainer">
+                <div class="wheel-info" id="wheelInfo">
+                    🎡 Vòng quay đã sẵn sàng với <strong id="segmentCount">6</strong> người tham gia
+                </div>
+
                 <div class="wheel-wrapper">
                     <div class="pointer"></div>
                     <canvas id="wheel" width="400" height="400"></canvas>
                 </div>
-                <br>
-                <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()">🎰 QUAY NGAY!</button>
+
+                <!-- Player Input Section -->
+                <div class="player-input-section">
+                    <div class="input-row">
+                        <label for="playerName">Họ và tên:</label>
+                        <input type="text" id="playerName" placeholder="Nhập tên của bạn..." />
+                    </div>
+                    <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()">🎰 QUAY NGAY!</button>
+                </div>
+                <div class="error-message" id="spinErrorMessage"></div>
             </div>
 
             <div class="result-section" id="resultSection">
@@ -762,7 +833,7 @@
         <span id="connectionText">Đang kết nối...</span>
     </div>
 
-    <!-- Password Modal -->
+    <!-- Password Modal for Clear -->
     <div class="modal-overlay" id="clearModal">
         <div class="modal">
             <h3>🔐 Xác Nhận Xóa Dữ Liệu</h3>
@@ -803,6 +874,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const resultsRef = database.ref('results');
+        const configRef = database.ref('config');
 
         // Wheel Colors
         const colors = [
@@ -815,8 +887,9 @@
         let segments = 6;
         let currentRotation = 0;
         let isSpinning = false;
-        let takenNumbers = new Set(); // Track taken numbers
-        let latestResultKey = null; // Track the newest result
+        let takenNumbers = new Set();
+        let latestResultKey = null;
+        let wheelCreated = false;
 
         // Connection Status
         const connectedRef = database.ref('.info/connected');
@@ -831,6 +904,38 @@
                 textEl.textContent = 'Mất kết nối';
             }
         });
+
+        // Check if wheel config exists on load
+        function initializeApp() {
+            configRef.once('value').then((snapshot) => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+
+                if (snapshot.exists()) {
+                    // Wheel already created - show wheel to players
+                    const config = snapshot.val();
+                    segments = config.segments || 6;
+                    wheelCreated = true;
+
+                    document.getElementById('setupSection').classList.add('hidden');
+                    document.getElementById('wheelContainer').classList.remove('hidden');
+                    document.getElementById('segmentCount').textContent = segments;
+                    document.getElementById('mainSubtitle').textContent = 'Nhập tên và bấm quay để tham gia!';
+
+                    drawWheel();
+                    document.getElementById('playerName').focus();
+                } else {
+                    // No wheel - show admin setup
+                    document.getElementById('setupSection').classList.remove('hidden');
+                    document.getElementById('mainSubtitle').textContent = 'Nhập thông số và mật khẩu để tạo vòng quay!';
+                    document.getElementById('participants').focus();
+                }
+            }).catch((error) => {
+                console.error('Error loading config:', error);
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('setupSection').classList.remove('hidden');
+                document.getElementById('mainSubtitle').textContent = 'Nhập thông số và mật khẩu để tạo vòng quay!';
+            });
+        }
 
         // Listen for realtime results
         resultsRef.on('value', (snapshot) => {
@@ -852,23 +957,27 @@
 
             if (results.length === 0) {
                 resultsList.innerHTML = '<div class="no-results">Chưa có kết quả nào. Hãy quay thử!</div>';
-                return;
+            } else {
+                resultsList.innerHTML = results.map((item, index) => {
+                    const rankClass = index === 0 ? 'top1' : index === 1 ? 'top2' : index === 2 ? 'top3' : '';
+                    const isNew = item.key === latestResultKey;
+                    return `
+                        <div class="result-item ${isNew ? 'new' : ''}">
+                            <div class="rank ${rankClass}">${index + 1}</div>
+                            <div class="info">
+                                <div class="name">👤 ${escapeHtml(item.name)}</div>
+                                <div class="time">${formatTime(item.timestamp)}</div>
+                            </div>
+                            <div class="number">${item.result}</div>
+                        </div>
+                    `;
+                }).join('');
             }
 
-            resultsList.innerHTML = results.map((item, index) => {
-                const rankClass = index === 0 ? 'top1' : index === 1 ? 'top2' : index === 2 ? 'top3' : '';
-                const isNew = item.key === latestResultKey;
-                return `
-                    <div class="result-item ${isNew ? 'new' : ''}">
-                        <div class="rank ${rankClass}">${index + 1}</div>
-                        <div class="info">
-                            <div class="name">👤 ${escapeHtml(item.name)}</div>
-                            <div class="time">${formatTime(item.timestamp)}</div>
-                        </div>
-                        <div class="number">${item.result}</div>
-                    </div>
-                `;
-            }).join('');
+            // Redraw wheel if created
+            if (wheelCreated) {
+                drawWheel();
+            }
         });
 
         function escapeHtml(text) {
@@ -885,8 +994,8 @@
             return `${hours}:${minutes}:${seconds}`;
         }
 
-        function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
+        function showError(elementId, message) {
+            const errorEl = document.getElementById(elementId);
             errorEl.textContent = message;
             errorEl.style.display = 'block';
             setTimeout(() => {
@@ -894,36 +1003,50 @@
             }, 3000);
         }
 
-        function validateInput() {
-            const nameInput = document.getElementById('playerName');
-            const participantsInput = document.getElementById('participants');
-            const name = nameInput.value.trim();
-            const participants = parseInt(participantsInput.value);
-
-            if (!name) {
-                showError('⚠️ Vui lòng nhập họ và tên của bạn!');
-                nameInput.focus();
-                return false;
-            }
-
-            if (isNaN(participants) || participants < 2 || participants > 20) {
-                showError('⚠️ Số người tham gia phải từ 2 đến 20!');
-                participantsInput.focus();
-                return false;
-            }
-
-            return true;
-        }
-
         function createWheel() {
-            if (!validateInput()) return;
-
             const participantsInput = document.getElementById('participants');
-            segments = parseInt(participantsInput.value);
+            const passwordInput = document.getElementById('adminPassword');
+            const participants = parseInt(participantsInput.value);
+            const password = passwordInput.value;
+
+            // Validate password
+            if (password !== ADMIN_PASSWORD) {
+                showError('errorMessage', '⚠️ Mật khẩu không đúng!');
+                passwordInput.value = '';
+                passwordInput.focus();
+                return;
+            }
+
+            // Validate participants
+            if (isNaN(participants) || participants < 2 || participants > 20) {
+                showError('errorMessage', '⚠️ Số người tham gia phải từ 2 đến 20!');
+                participantsInput.focus();
+                return;
+            }
+
+            segments = participants;
+            wheelCreated = true;
+
+            // Save config to Firebase so others can see the wheel
+            configRef.set({
+                segments: segments,
+                createdAt: Date.now()
+            }).then(() => {
+                console.log('Wheel config saved to Firebase');
+            }).catch((error) => {
+                console.error('Error saving config:', error);
+            });
+
+            // Hide setup section, show wheel
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('wheelContainer').classList.remove('hidden');
+            document.getElementById('segmentCount').textContent = segments;
+            document.getElementById('mainSubtitle').textContent = 'Nhập tên và bấm quay để tham gia!';
 
             drawWheel();
-            document.getElementById('wheelContainer').classList.remove('hidden');
-            document.getElementById('resultSection').style.display = 'none';
+
+            // Focus on player name input
+            document.getElementById('playerName').focus();
         }
 
         function drawWheel() {
@@ -948,7 +1071,6 @@
                 ctx.arc(centerX, centerY, radius, startAngle, endAngle);
                 ctx.closePath();
 
-                // Gray out taken numbers
                 if (isTaken) {
                     ctx.fillStyle = '#555';
                 } else {
@@ -972,7 +1094,6 @@
                 ctx.shadowBlur = 3;
                 ctx.fillText(num, radius - 20, 6);
                 if (isTaken) {
-                    // Draw strikethrough for taken numbers
                     ctx.strokeStyle = '#ff6b6b';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
@@ -1010,15 +1131,14 @@
             const playerName = nameInput.value.trim();
 
             if (!playerName) {
-                showError('⚠️ Vui lòng nhập họ và tên trước khi quay!');
+                showError('spinErrorMessage', '⚠️ Vui lòng nhập họ và tên trước khi quay!');
                 nameInput.focus();
                 return;
             }
 
-            // Check if all numbers are taken
             const availableNumbers = getAvailableNumbers();
             if (availableNumbers.length === 0) {
-                showError('⚠️ Tất cả các số đã được chọn! Vui lòng xóa dữ liệu để bắt đầu lại.');
+                showError('spinErrorMessage', '⚠️ Tất cả các số đã được chọn! Vui lòng xóa dữ liệu để bắt đầu lại.');
                 return;
             }
 
@@ -1028,14 +1148,12 @@
             spinBtn.innerHTML = '<span class="loading"></span> Đang quay...';
             document.getElementById('resultSection').style.display = 'none';
 
-            // Random result (1 to segments)
             const winningNumber = Math.floor(Math.random() * segments) + 1;
             const isDuplicate = takenNumbers.has(winningNumber);
 
-            // Calculate rotation
             const anglePerSegment = 360 / segments;
             const targetAngle = 360 - (winningNumber - 1) * anglePerSegment - anglePerSegment / 2;
-            const extraSpins = 5 + Math.random() * 3; // 5-8 full rotations
+            const extraSpins = 5 + Math.random() * 3;
             const totalRotation = extraSpins * 360 + targetAngle;
 
             const canvas = document.getElementById('wheel');
@@ -1043,7 +1161,6 @@
             currentRotation += totalRotation;
             canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Show result after spin
             setTimeout(() => {
                 const resultSection = document.getElementById('resultSection');
                 const resultTitle = document.getElementById('resultTitle');
@@ -1054,14 +1171,12 @@
                 resultNumber.textContent = winningNumber;
 
                 if (isDuplicate) {
-                    // Number already taken
                     resultSection.classList.add('duplicate');
                     resultTitle.textContent = '⚠️ Số này đã có người chọn!';
-                    duplicateMessage.textContent = 'Vui lòng nhấn QUAY NGAY để quay lại.';
+                    duplicateMessage.textContent = 'Vui lòng nhấn QUAY LẠI để quay lại.';
                     duplicateMessage.style.display = 'block';
                     spinBtn.innerHTML = '🔄 QUAY LẠI!';
                 } else {
-                    // Valid number - save to Firebase
                     resultSection.classList.remove('duplicate');
                     resultTitle.textContent = '🎉 Kết quả của bạn:';
                     duplicateMessage.style.display = 'none';
@@ -1077,11 +1192,11 @@
                     }).then(() => {
                         console.log('Result saved to Firebase');
                         createConfetti();
-                        // Redraw wheel to show taken number
-                        drawWheel();
+                        // Clear player name for next person
+                        nameInput.value = '';
                     }).catch((error) => {
                         console.error('Error saving to Firebase:', error);
-                        showError('⚠️ Lỗi khi lưu kết quả!');
+                        showError('spinErrorMessage', '⚠️ Lỗi khi lưu kết quả!');
                     });
                 }
 
@@ -1132,14 +1247,23 @@
             const modalError = document.getElementById('modalError');
 
             if (password === ADMIN_PASSWORD) {
-                // Clear all data
-                resultsRef.remove().then(() => {
-                    console.log('All results cleared');
+                // Clear results and config
+                Promise.all([
+                    resultsRef.remove(),
+                    configRef.remove()
+                ]).then(() => {
+                    console.log('All data cleared');
                     closeClearModal();
                     takenNumbers.clear();
                     latestResultKey = null;
-                    drawWheel();
+                    wheelCreated = false;
+
+                    // Show setup section again
+                    document.getElementById('wheelContainer').classList.add('hidden');
+                    document.getElementById('setupSection').classList.remove('hidden');
                     document.getElementById('resultSection').style.display = 'none';
+                    document.getElementById('mainSubtitle').textContent = 'Nhập thông số và mật khẩu để tạo vòng quay!';
+                    document.getElementById('participants').focus();
                 }).catch((error) => {
                     console.error('Error clearing data:', error);
                     modalError.textContent = 'Lỗi khi xóa dữ liệu!';
@@ -1153,18 +1277,14 @@
             }
         }
 
-        // Close modal when clicking outside
         document.getElementById('clearModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeClearModal();
             }
         });
 
-        // Initialize wheel on load
-        window.onload = () => {
-            const nameInput = document.getElementById('playerName');
-            nameInput.focus();
-        };
+        // Initialize on load
+        window.onload = initializeApp;
     </script>
 </body>
 
