@@ -1164,22 +1164,34 @@
             // Calculate rotation to land on the winning number
             // The wheel is drawn with segment 1 starting at -90deg (top)
             // Each segment spans (360/segments) degrees
-            // To land on segment N, we need to rotate so that segment N is at the top (where pointer is)
             const anglePerSegment = 360 / segments;
 
-            // Calculate the angle where the CENTER of the winning segment should be at the top
-            // Segment 1 center is at 0 degrees from wheel's perspective (top)
-            // Segment N center is at (N-1) * anglePerSegment degrees clockwise
-            // We need to rotate the wheel so this position comes to the top (under the pointer)
+            // Calculate the target angle for the winning segment
+            // Segment 1 is at the top (0 degrees), segment 2 is clockwise, etc.
+            // To land pointer on segment N, wheel needs to show segment N at top
             const segmentCenterAngle = (winningNumber - 1) * anglePerSegment;
 
-            // Add random offset within the segment to make it look more natural (stay within segment bounds)
-            const randomOffset = (Math.random() - 0.5) * (anglePerSegment * 0.6); // 60% of segment width
+            // The target position is where we want the wheel to stop (segment center at top)
+            // Since we rotate clockwise, we need 360 - segmentCenterAngle
+            const targetPosition = 360 - segmentCenterAngle;
+a
+            // Add small random offset within segment bounds for natural look
+            const randomOffset = (Math.random() - 0.5) * (anglePerSegment * 0.5);
 
-            // Calculate total rotation (5-8 full spins + target position)
-            const extraSpins = 5 + Math.random() * 3;
-            const targetAngle = 360 - segmentCenterAngle + randomOffset;
-            const totalRotation = extraSpins * 360 + targetAngle;
+            // Calculate where the wheel currently is (normalize to 0-360)
+            const currentPosition = currentRotation % 360;
+
+            // Calculate how much we need to rotate from current position to target
+            let rotationNeeded = targetPosition + randomOffset - currentPosition;
+
+            // Make sure we rotate forward (positive), not backward
+            if (rotationNeeded < 0) {
+                rotationNeeded += 360;
+            }
+
+            // Add 5-8 full spins for dramatic effect
+            const extraSpins = Math.floor(5 + Math.random() * 3) * 360;
+            const totalRotation = extraSpins + rotationNeeded;
 
             const canvas = document.getElementById('wheel');
             canvas.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
