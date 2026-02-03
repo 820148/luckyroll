@@ -1162,40 +1162,49 @@
             const winningNumber = Math.floor(Math.random() * segments) + 1;
             const isDuplicate = takenNumbers.has(winningNumber);
             // Calculate rotation to land on the winning number
-            // The wheel is drawn with segment 1 starting at -90deg (top)
-            // Each segment spans (360/segments) degrees
+            // 
+            // HOW THE WHEEL IS DRAWN:
+            // - Segment 1 starts at -90° (top), going CLOCKWISE
+            // - Each segment spans (360/segments) degrees
+            // - Segment 1: from -90° to -90° + anglePerSegment
+            // - Segment 2: from -90° + anglePerSegment to -90° + 2*anglePerSegment
+            // - etc.
+            //
+            // HOW CSS ROTATION WORKS:
+            // - rotate(X deg) rotates CLOCKWISE by X degrees
+            // - When rotation = 0, segment 1's LEFT EDGE is at the pointer (top)
+            //
+            // TO LAND ON SEGMENT N:
+            // - We need segment N to be under the pointer
+            // - Segment N's left edge is at (N-1) * anglePerSegment from top
+            // - To put segment N's CENTER under pointer, rotate by:
+            //   (N-1) * anglePerSegment + anglePerSegment/2
+
             const anglePerSegment = 360 / segments;
 
-            // Segment N starts at angle (N-1) * anglePerSegment from the top
-            // The CENTER of segment N is at (N-1) * anglePerSegment + anglePerSegment/2
-            // But when we draw, segment 1's left edge starts at top (-90deg)
-            // So segment 1's center is at anglePerSegment/2 from top
-            // Segment N's center is at (N-1) * anglePerSegment + anglePerSegment/2
+            // Target rotation to put segment N's center at pointer
+            // When wheel rotates clockwise, segment N moves clockwise relative to pointer
+            // So to bring segment N to pointer, we rotate the amount needed
+            const targetAngle = (winningNumber - 1) * anglePerSegment + anglePerSegment / 2;
 
-            // To make pointer land on segment N's center, we rotate wheel so that
-            // segment N's center comes to top (where pointer is)
-            // This means rotating BACKWARDS by the segment center angle
-            const segmentCenterFromTop = (winningNumber - 1) * anglePerSegment + anglePerSegment / 2;
+            // Add small random offset but keep within segment bounds (±40% of half segment)
+            const maxOffset = anglePerSegment * 0.4;
+            const randomOffset = (Math.random() - 0.5) * maxOffset;
+            const targetWithOffset = targetAngle + randomOffset;
 
-            // Calculate target rotation (negative because wheel coords vs CSS rotation)
-            const targetPosition = 360 - segmentCenterFromTop;
+            // Current wheel position (normalized to 0-360)
+            const currentPos = ((currentRotation % 360) + 360) % 360;
 
-            // Add small random offset within segment bounds for natural look (±25% of segment)
-            const randomOffset = (Math.random() - 0.5) * (anglePerSegment * 0.4);
+            // How much to rotate from current position to target
+            let rotationNeeded = targetWithOffset - currentPos;
 
-            // Calculate where the wheel currently is (normalize to 0-360)
-            const currentPosition = ((currentRotation % 360) + 360) % 360;
-
-            // Calculate how much we need to rotate from current position to target
-            let rotationNeeded = (targetPosition + randomOffset) - currentPosition;
-
-            // Make sure we rotate forward (positive), not backward
-            if (rotationNeeded <= 0) {
+            // Ensure positive rotation (always spin forward)
+            while (rotationNeeded <= 0) {
                 rotationNeeded += 360;
             }
 
-            // Add 5-8 full spins for dramatic effect
-            const extraSpins = Math.floor(5 + Math.random() * 3) * 360;
+            // Add 5-8 full spins for drama
+            const extraSpins = (5 + Math.floor(Math.random() * 3)) * 360;
             const totalRotation = extraSpins + rotationNeeded;
 
             const canvas = document.getElementById('wheel');
